@@ -103,6 +103,17 @@ if __name__ == "__main__":
                 x1, y1 = cdnt_obj[0][0], cdnt_obj[3][1]
                 x2, y2 = cdnt_obj[1][0], cdnt_obj[2][1]
                 print("Center", center)
+
+
+                # map to all the functions
+                """ TODO  -
+                1 - pass clone to denoise
+                2 - detect which segment through the center of the segment 
+                3 - use each mapper function to make meaning of each segment change and save it in excel too 
+                4 - 
+                """
+
+
                 cv2.rectangle(clone, (x1, y1), (x2, y2), (255, 0, 0))
                 cv2.imshow("Thesholded", thresholded)
 
