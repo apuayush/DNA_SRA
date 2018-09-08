@@ -41,39 +41,38 @@ def segment(img, threshold=25):
 
 
 def detect_moving_object(thresholded, segmented):
-    cdnt_obj = []
+
     con_hull = cv2.convexHull(segmented)
-    print("Hull:", len(con_hull))
 
     # find left right top bottom convex hull points
-    for i in range(len(con_hull)):
-        extreme_top = tuple(con_hull[con_hull[:, :, 1].argmin()][i])
-        extreme_bottom = tuple(con_hull[con_hull[:, :, 1].argmax()][i])
-        extreme_left = tuple(con_hull[con_hull[:, :, 0].argmin()][i])
-        extreme_right = tuple(con_hull[con_hull[:, :, 0].argmax()][i])
-        center_X = (extreme_left[0] + extreme_right[0]) // 2
-        center_Y = (extreme_top[0] + extreme_bottom[0]) // 2
+    extreme_top = tuple(con_hull[con_hull[:, :, 1].argmin()][0])
+    extreme_bottom = tuple(con_hull[con_hull[:, :, 1].argmax()][0])
+    extreme_left = tuple(con_hull[con_hull[:, :, 0].argmin()][0])
+    extreme_right = tuple(con_hull[con_hull[:, :, 0].argmax()][0])
+    center_X = (extreme_left[0] + extreme_right[0]) // 2
+    center_Y = (extreme_top[1] + extreme_bottom[1]) // 2
+    center = [center_X, center_Y]
 
-        #  find max distance b/w center and a convex_hull point
-        distance = pairwise.euclidean_distances([(center_X, center_Y)],
-                                                Y=[extreme_left, extreme_right, extreme_top, extreme_bottom])[0]
-        # Coordinates of moving object
-        k = [extreme_left, extreme_right, extreme_bottom, extreme_top]
-    cdnt_obj.append(k)
-    print("cdnt obj",cdnt_obj)
-    return cdnt_obj, distance
+    #  find max distance b/w center and a convex_hull point
+    distance = pairwise.euclidean_distances([(center_X, center_Y)],
+                                            Y=[extreme_left, extreme_right, extreme_top, extreme_bottom])[0]
+    # Coordinates of moving object
+    cdnt_object = [extreme_left, extreme_right, extreme_bottom, extreme_top]
+    print(cdnt_object)
+    return cdnt_object, distance, center
 
 
 if __name__ == "__main__":
     avg_wt = 0.3
     # camera = cv2.VideoCapture(sys.argv[1])
-    camera = cv2.VideoCapture('data/Problem 2/Altitude_Digits.avi')
+    camera = cv2.VideoCapture('data/Problem 2/slip.avi')
     # initialize num of frames
     num_frames = 0
-
+    x1, x2, y1, y2 = [0]*4
     while True:
         # current frame
         ret_value, frame = camera.read()
+
         if ret_value == False:
             break
 
@@ -99,20 +98,30 @@ if __name__ == "__main__":
                 (thresholded, segmented) = seg_img
 
                 # draw segment region and display the frame
-                cdnt_obj, distance = detect_moving_object(thresholded, segmented)
+                cdnt_obj, distance, center = detect_moving_object(thresholded, segmented)
                 alpha = 10
-                for i in range(len(cdnt_obj))
-                    x1, y1 = cdnt_obj[i][0][0]-alpha, cdnt_obj[i][3][1]+alpha
-                    x2, y2 = cdnt_obj[i][1][0]+alpha, cdnt_obj[i][2][1]-alpha
-                    # print("Points",x1,y1,x2,y2)
-                    cv2.rectangle(thresholded, (x1, y1), (x2, y2), (255, 255, 255))
+                x1, y1 = cdnt_obj[0][0], cdnt_obj[3][1]
+                x2, y2 = cdnt_obj[1][0], cdnt_obj[2][1]
+                print("Center", center)
+
+
+                # map to all the functions
+                """ TODO  -
+                1 - pass clone to denoise
+                2 - detect which segment through the center of the segment 
+                3 - use each mapper function to make meaning of each segment change and save it in excel too 
+                4 - 
+                """
+
+
+                cv2.rectangle(clone, (x1, y1), (x2, y2), (255, 0, 0))
                 cv2.imshow("Thesholded", thresholded)
 
         num_frames += 1
 
         # display the frame with segmented hand
         cv2.imshow("Video Feed", clone)
-
+        cv2.rectangle(clone, (x1, y1), (x2, y2), (255, 0, 0))
         # observe the keypress by the user
         keypress = cv2.waitKey(1) & 0xFF
 
