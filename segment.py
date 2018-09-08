@@ -1,6 +1,7 @@
 # libraries
 import cv2
 import imutils
+import sys
 import numpy as np
 from sklearn.metrics import pairwise
 
@@ -35,70 +36,47 @@ def segment(img, threshold=25):
         return
     else:
         # maximum contour area
-        segmented = max(cnts, key=cv2.contourArea)
+        segmented = min(cnts, key=cv2.contourArea)
         return (thresholded, segmented)
 
 
 def detect_moving_object(thresholded, segmented):
-
+    cdnt_obj = []
     con_hull = cv2.convexHull(segmented)
+    print("Hull:", len(con_hull))
+
     # find left right top bottom convex hull points
-    extreme_top = tuple(con_hull[con_hull[:, :, 1].argmin()][0])
-    extreme_bottom = tuple(con_hull[con_hull[:, :, 1].argmax()][0])
-    extreme_left = tuple(con_hull[con_hull[:, :, 0].argmin()][0])
-    extreme_right = tuple(con_hull[con_hull[:, :, 0].argmax()][0])
-    print(con_hull)
-    center_X = (extreme_left[0] + extreme_right[0]) // 2
-    center_Y = (extreme_top[0] + extreme_bottom[0]) // 2
+    for i in range(len(con_hull)):
+        extreme_top = tuple(con_hull[con_hull[:, :, 1].argmin()][i])
+        extreme_bottom = tuple(con_hull[con_hull[:, :, 1].argmax()][i])
+        extreme_left = tuple(con_hull[con_hull[:, :, 0].argmin()][i])
+        extreme_right = tuple(con_hull[con_hull[:, :, 0].argmax()][i])
+        center_X = (extreme_left[0] + extreme_right[0]) // 2
+        center_Y = (extreme_top[0] + extreme_bottom[0]) // 2
 
-    #  find max distance b/w center and a convex_hull point
-    distance = pairwise.euclidean_distances([(center_X, center_Y)],
-                                            Y=[extreme_left, extreme_right, extreme_top, extreme_bottom])[0]
-    maximum_distance = distance[distance.argmax()]
-
-    # 80% of maximum euclidean distance
-    radius = int(0.8 * maximum_distance)
-
-    circumference = (2 * np.pi * radius)
-
-    # take out the circular region coinciding with palm and fingers
-    circular_roi = np.zeros(thresholded.shape[:2], dtype="uint8")
-
-    cv2.circle(circular_roi, (center_X, center_Y), radius, 255, 1)
-
-    circular_roi = cv2.bitwise_and(thresholded, thresholded, mask=circular_roi)
-
-    # compute the contours in the circular ROI
-    (_, contours, _) = cv2.findContours(circular_roi.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-
-    # initalize the finger count
-    count = 0
-
-    for c in contours:
-        # compute the bounding box of the contour
-        (x, y, w, h) = cv2.boundingRect(c)
-
-        # increment the count of fingers only if -
-        # 1. The contour region is not the wrist (bottom area)
-        # 2. The number of points along the contour does not exceed
-        #     25% of the circumference of the circular ROI
-        if ((center_Y + (center_Y * 0.25)) > (y + h)) and ((circumference * 0.25) > c.shape[0]):
-            count += 1
-
-    return count
+        #  find max distance b/w center and a convex_hull point
+        distance = pairwise.euclidean_distances([(center_X, center_Y)],
+                                                Y=[extreme_left, extreme_right, extreme_top, extreme_bottom])[0]
+        # Coordinates of moving object
+        k = [extreme_left, extreme_right, extreme_bottom, extreme_top]
+    cdnt_obj.append(k)
+    print("cdnt obj",cdnt_obj)
+    return cdnt_obj, distance
 
 
 if __name__ == "__main__":
     avg_wt = 0.3
-    camera = cv2.VideoCapture('imgs/Problem 2/Wind_Arrow.avi')
-    top, right, bottom, left = 10, 350, 225, 590
-
+    # camera = cv2.VideoCapture(sys.argv[1])
+    camera = cv2.VideoCapture('data/Problem 2/Altitude_Digits.avi')
     # initialize num of frames
     num_frames = 0
 
     while True:
         # current frame
         ret_value, frame = camera.read()
+        if ret_value == False:
+            break
+
         frame = imutils.resize(frame, width=700)
         # flip the frame to remove mirror view
         clone = frame.copy()
@@ -121,13 +99,15 @@ if __name__ == "__main__":
                 (thresholded, segmented) = seg_img
 
                 # draw segment region and display the frame
-                cv2.drawContours(clone, [segmented + (right, top)], -1, (0, 0, 255))
-                fingers = detect_moving_object(thresholded, segmented)
-                cv2.putText(clone, str(fingers), (70, 45), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                cdnt_obj, distance = detect_moving_object(thresholded, segmented)
+                alpha = 10
+                for i in range(len(cdnt_obj))
+                    x1, y1 = cdnt_obj[i][0][0]-alpha, cdnt_obj[i][3][1]+alpha
+                    x2, y2 = cdnt_obj[i][1][0]+alpha, cdnt_obj[i][2][1]-alpha
+                    # print("Points",x1,y1,x2,y2)
+                    cv2.rectangle(thresholded, (x1, y1), (x2, y2), (255, 255, 255))
                 cv2.imshow("Thesholded", thresholded)
 
-        # draw segmented hand
-        # cv2.rectangle(clone, (left, top), (right, bottom), (0, 255, 0), 2)
         num_frames += 1
 
         # display the frame with segmented hand
