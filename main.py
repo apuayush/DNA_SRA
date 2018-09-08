@@ -1,4 +1,4 @@
-import numpy as np
+import imutils
 
-if __name__ == "__main__":
-    
+img = None
+segment = utils.segment_divider(img)

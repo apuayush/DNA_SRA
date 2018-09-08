@@ -40,30 +40,6 @@ def segment(img, threshold=25):
         segmented = max(cnts, key=cv2.contourArea)
         return (thresholded, segmented)
 
-
-def detect_moving_object(thresholded, segmented):
-
-    # con_hull = cv2.convexHull(segmented)
-    print(len(con_hull))
-
-    # find left right top bottom convex hull points
-    extreme_top = tuple(con_hull[con_hull[:, :, 1].argmin()][0])
-    extreme_bottom = tuple(con_hull[con_hull[:, :, 1].argmax()][0])
-    extreme_left = tuple(con_hull[con_hull[:, :, 0].argmin()][0])
-    extreme_right = tuple(con_hull[con_hull[:, :, 0].argmax()][0])
-    center_X = (extreme_left[0] + extreme_right[0]) // 2
-    center_Y = (extreme_top[1] + extreme_bottom[1]) // 2
-    center = [center_X, center_Y]
-
-    #  find max distance b/w center and a convex_hull point
-    distance = pairwise.euclidean_distances([(center_X, center_Y)],
-                                            Y=[extreme_left, extreme_right, extreme_top, extreme_bottom])[0]
-    # Coordinates of moving object
-    cdnt_object = [extreme_left, extreme_right, extreme_bottom, extreme_top]
-    # print("cdnt_object:",cdnt_object)
-    return cdnt_object, distance, center
-
-
 if __name__ == "__main__":
     avg_wt = 0.6
     camera = cv2.VideoCapture(sys.argv[1])
@@ -100,15 +76,10 @@ if __name__ == "__main__":
             if seg_img is not None:
                 # i.e. if segmented
                 (thresholded, segmented) = seg_img
-
-                # draw segment region and display the frame
-                cdnt_obj, distance, center = detect_moving_object(thresholded, segmented)
-                alpha = 10
-                x1, y1 = cdnt_obj[0][0], cdnt_obj[3][1]
-                x2, y2 = cdnt_obj[1][0], cdnt_obj[2][1]
                 # print("Center", center)
 
-                # seg_no, seg_coords = utils.segment_divider(center)
+                selected_partitions = utils.segment_divider(thresholded)
+                print(selected_partitions)
                 # return segment coordinates cooresponding to a center value
                 # map to all the functions
                 """ TODO  -
@@ -117,7 +88,7 @@ if __name__ == "__main__":
                 3 - use each mapper function to make meaning of each segment change and save it in excel too 
                 4 - 
                 """
-                # print("segmentation", seg_no, seg_coords)
+
                 # cv2.rectangle(clone, (x1, y1), (x2, y2), (255, 0, 0))
                 cv2.imshow("Thesholded", thresholded)
 

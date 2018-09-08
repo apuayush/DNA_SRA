@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 import json
 
+
 def threshold(image):
     """ Does thresholding
     """
@@ -18,20 +19,27 @@ def denoise(image):
     new = cv2.bilateralFilter(image, 9, 75, 75)
     return new
 
-def segment_divider(center):
+
+def segment_divider(thresholded_frame):
     """
     return segment coordinates cooresponding to a center
     :param center:
     :return:
     """
-    segments = None
+    segments = []
+    selected_partition = []
     with open('admin_tools/imgs/img.json', 'r') as f:
         segments = json.load(f)
-
-    # print(segments)
     for single_seg in segments.keys():
-        seg_coords = segments[single_seg]
-        k = [center[0]-seg_coords[0], seg_coords[1]-center[1], seg_coords[2]-center[0], center[1]-seg_coords[3]]
+        try:
+            x1, y1, x2, y2 = segments[single_seg]
+            cropped_image = thresholded_frame[y1:y2, x1:x2]
 
-        if min(k)>=0:
-            return single_seg, seg_coords
+            bench = np.count_nonzero((170 < cropped_image))
+            # print(bench/ thresholded_frame.size)
+            if bench/ cropped_image.size > 0.0001:
+                selected_partition.append({single_seg: [x1,y1,x2,y2]})
+        except: pass
+
+
+    return selected_partition
