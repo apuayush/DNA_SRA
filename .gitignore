@@ -1,3 +1,5 @@
 weights/
-dataset/
-.ipynb_checkpoints
+data/*
+dataset/*
+__pycache__
+*.ipynb_checkpoints
