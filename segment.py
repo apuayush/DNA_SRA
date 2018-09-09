@@ -47,6 +47,7 @@ if __name__ == "__main__":
     # initialize num of frames
     num_frames = 0
     x1, x2, y1, y2 = [0]*4
+    selected_partitions_global = []
     while True:
         # current frame
         ret_value, frame = camera.read()
@@ -77,14 +78,13 @@ if __name__ == "__main__":
                 # i.e. if segmented
                 (thresholded, segmented) = seg_img
                 # print("Center", center)
-
-                selected_partitions = utils.segment_divider(thresholded)
-                print(selected_partitions)
+                if num_frames < 20:
+                    selected_partitions = utils.segment_divider(thresholded)
+                    if len(selected_partitions_global) < len(selected_partitions):
+                        selected_partitions_global = selected_partitions
                 # return segment coordinates cooresponding to a center value
                 # map to all the functions
-                """ TODO  -
-                1 - pass clone to denoise - done
-                2 - detect which segment through the center of the segment 
+                """
                 3 - use each mapper function to make meaning of each segment change and save it in excel too 
                 4 - 
                 """

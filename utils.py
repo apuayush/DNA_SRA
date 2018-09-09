@@ -37,7 +37,7 @@ def segment_divider(thresholded_frame):
 
             bench = np.count_nonzero((170 < cropped_image))
             # print(bench/ thresholded_frame.size)
-            if bench/ cropped_image.size > 0.0001:
+            if bench / cropped_image.size > 0.0001:
                 selected_partition.append({single_seg: [x1,y1,x2,y2]})
         except: pass
 
