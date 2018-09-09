@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 import imutils
 import utils
+import pytesseract
 import matplotlib.pyplot as plt
 
 
@@ -16,13 +17,14 @@ def VTA_2(coord, frame):
 def AirSpeed_3(coord, frame):
     x1, y1, x2, y2 = coord
     frame = frame[y1:y2, x1:x2]
-    print("threshold shape", frame.shape)
-    # frame = frame[55:80, 220:280]
-
+    # print("threshold shape", frame.shape)
+    frame = frame[155:195, 5:50]
+    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
     frame = utils.threshold(frame).astype('float')
     # plt.imshow(frame, cmap=plt.cm.gray)
 
     txt = pytesseract.image_to_string(frame)
+    txt = txt.replace("D","0").replace("U", "0").replace("O","0").replace("S", "5")
     return txt
 
 
@@ -36,7 +38,8 @@ def ICE_5(coord, frame):
     flag = 0
     p = np.count_nonzero(roi > 200)
     p = p / frame.size
-    if p >= 0.05:
+    # print("P value",p)
+    if p >= 0.0002:
         flag = 1
     return flag
 
@@ -44,8 +47,9 @@ def ICE_5(coord, frame):
 def LAT_6(coord, frame):
 
     lat = frame[coord[1]:coord[-1], coord[0]:coord[-2]]
+    lat = cv2.cvtColor(lat, cv2.COLOR_RGB2GRAY)
     # print(lat.shape)
-    t = threshold(np.asarray(frame)[34:45, 50:222])
+    t = threshold(np.asarray(lat)[34:45, 50:222])
     n = np.where(t == True)
     y = sum(n[1])/len(n[1])
     return (y/160 * 20) - 10
@@ -70,12 +74,11 @@ def Slip_9(coord, frame):
     cnts = cnts[0] if imutils.is_cv2() else cnts[1]
 
     m = 0
-    for c in cnts:
-        M = cv2.moments(c)
+    M = cv2.moments(cnts[0])
     cX = int(M["m10"] / M["m00"])
     m = max(abs(cX - 123), m)
 
-    return m / 123 * 100
+    return (((m / 123 * 100)-50)/10)+2
 
 def alt_digit(coords, frame):
     return 1

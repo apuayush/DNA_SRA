@@ -1,4 +1,4 @@
-from skimage.filters import threshold_minimum
+from skimage.filters import threshold_otsu
 import numpy as np
 import cv2
 import json
@@ -7,10 +7,11 @@ import json
 def threshold(image):
     """ Does thresholding
     """
+    print(image.shape)
+    # image = np.dot(image[...,:3], [0.299, 0.587, 0.114])
     image = np.asarray(image)
-    image = np.dot(image[...,:3], [0.299, 0.587, 0.114])
-    # image = image.reshape(image.shape)
-    thresh = threshold_minimum(image)
+    print(image.shape)
+    thresh = threshold_otsu(image)
     return image > thresh
 
 
