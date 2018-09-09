@@ -50,7 +50,7 @@ if __name__ == "__main__":
     while True:
         # current frame
         ret_value, frame = camera.read()
-
+        denoised_value = utils.denoise(image)
         if ret_value == False:
             break
 
@@ -118,7 +118,7 @@ if __name__ == "__main__":
                         # mapper_return = mapper_func[partition_number](selected_partitions_global[partition_number], frame)
                         # print("Partition: ", partition_number, "Output: ", mapper_return)
                         # x1, y1, x2, y2 = selected_partitions_global[partition_number]
-                        # cv2.rectangle(denoised_clone, (x1, y1), (x2, y2), (0, 255, 0), 5)
+                        cv2.rectangle(denoised_clone, (x1, y1), (x2, y2), (0, 255, 0), 5)
 
                 start(all_procs)
                 stop(all_procs)
@@ -134,7 +134,7 @@ if __name__ == "__main__":
         num_frames = (num_frames+1)%200
 
         # display the frame with segmented hand
-        # cv2.imshow("Video Feed", clone)
+        cv2.imshow("denoised Video", denoised_clone)
 
 
         # cv2.rectangle(clone, (x1, y1), (x2, y2), (255, 0, 0))

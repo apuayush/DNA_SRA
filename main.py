@@ -77,7 +77,7 @@ if __name__ == "__main__":
                         mapper_return = mapper_func[partition_number](selected_partitions_global[partition_number], denoised_clone)
                         print("Partition: ", partition_number, "Output: ", mapper_return)
                         x1, y1, x2, y2 = selected_partitions_global[partition_number]
-                        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 5)
+                        cv2.rectangle(denoised_clone, (x1, y1), (x2, y2), (0, 255, 0), 5)
 
                 # cv2.imshow("Thesholded", thresholded)
 
