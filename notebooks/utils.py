@@ -43,15 +43,3 @@ def segment_divider(thresholded_frame):
 
 
     return selected_partition
-
-def map_3(x1, y1, x2, y2, frame):
-    """
-    Takes a frame from partition 3 and OCRs it
-    """
-    frame = frame[y1:y2, x1:x2]
-    frame = frame[55:80, 220:280]    
-    frame = utils.threshold(frame).astype('float')
-    plt.imshow(frame, cmap=plt.cm.gray)
-    
-    txt = pytesseract.image_to_string(frame)
-    return txt
