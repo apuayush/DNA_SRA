@@ -41,8 +41,7 @@ if __name__ == "__main__":
             break
 
         # frame = imutils.resize(frame, width=700)
-        # flip the frame to remove mirror view
-        clone = frame.copy()
+        clone = frame[:, :]
         # get the height and width of the frame
         (height, width) = frame.shape[:2]
         # convert the roi to grayscale and blur it
@@ -69,23 +68,20 @@ if __name__ == "__main__":
                     selected_partitions = utils.segment_divider(thresholded)
                     if len(selected_partitions_global) < len(selected_partitions):
                         selected_partitions_global = selected_partitions
-                # return segment coordinates cooresponding to a center value
-                # map to all the functions
-                # cv2.rectangle(clone, (x1, y1), (x2, y2), (255, 0, 0))
+
                 # get the mapper function to each segment
                 print(len(selected_partitions_global))
                 if len(selected_partitions_global) > 0:
                     for partition_number in selected_partitions_global.keys():
                         print(partition_number)
-                        mapper_return = mapper_func[partition_number](selected_partitions_global[partition_number], frame)
+                        mapper_return = mapper_func[partition_number](selected_partitions_global[partition_number], clone)
                         print("Partition: ", partition_number, "Output: ", mapper_return)
                         x1, y1, x2, y2 = selected_partitions_global[partition_number]
-                        cv2.rectangle(denoised_clone, (x1, y1), (x2, y2), (0, 255, 0), 5)
+                        # cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 5)
 
-                cv2.imshow("Thesholded", thresholded)
-                # x1, y1, x2, y2 = selected_partitions_global[list(selected_partitions_global.keys())[0]]
-                # cv2.rectangle(denoised_clone, (x1,y1),(x2,y2), (0,255,0), 5)
-                cv2.imshow("Denoised Video", denoised_clone)
+                # cv2.imshow("Thesholded", thresholded)
+
+                cv2.imshow("Denoised Video", frame)
 
 
 

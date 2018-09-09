@@ -36,7 +36,8 @@ def ICE_5(coord, frame):
     flag = 0
     p = np.count_nonzero(roi > 200)
     p = p / frame.size
-    if p >= 0.05:
+    # print("P value",p)
+    if p >= 0.0002:
         flag = 1
     return flag
 
@@ -44,8 +45,9 @@ def ICE_5(coord, frame):
 def LAT_6(coord, frame):
 
     lat = frame[coord[1]:coord[-1], coord[0]:coord[-2]]
+    lat = cv2.cvtColor(lat, cv2.COLOR_RGB2GRAY)
     # print(lat.shape)
-    t = threshold(np.asarray(frame)[34:45, 50:222])
+    t = threshold(np.asarray(lat)[34:45, 50:222])
     n = np.where(t == True)
     y = sum(n[1])/len(n[1])
     return (y/160 * 20) - 10
