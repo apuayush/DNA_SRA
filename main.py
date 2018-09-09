@@ -8,6 +8,7 @@ import sys
 import numpy as np
 from sklearn.metrics import pairwise
 import utils
+from time import time
 
 
 img = None
@@ -53,6 +54,7 @@ if __name__ == "__main__":
         # calibrating our running average until a threshold is reached
         denoised_clone = utils.denoise(clone)
 
+        start_time = time()
 
         if num_frames < 6:
             running_avg(thresh, avg_wt)
@@ -83,7 +85,9 @@ if __name__ == "__main__":
 
                 cv2.imshow("Denoised Video", denoised_clone)
 
+        end_time = time()
 
+        print('Time taken for the frame: ', (end_time - start_time))
 
         num_frames = (num_frames+1)%200
 

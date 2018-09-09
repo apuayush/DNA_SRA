@@ -9,6 +9,7 @@ import numpy as np
 from sklearn.metrics import pairwise
 import utils
 from multiprocessing import Process, Manager, Lock
+from time import time
 
 
 img = None
@@ -68,6 +69,7 @@ if __name__ == "__main__":
         # calibrating our running average until a threshold is reached
         # denoised_clone = utils.denoise(clone)
 
+        start_time = time() # start time of partition functions
 
         if num_frames < 6:
             running_avg(thresh, avg_wt)
@@ -124,6 +126,10 @@ if __name__ == "__main__":
                 stop(all_procs)
 
                 print('Printing return list: ', return_list)
+
+                end_time = time() # start time of partition functions
+
+                print('Time taken for the frame: ', (end_time - start_time))
 
                 # cv2.imshow("Thesholded", thresholded)
                 # x1, y1, x2, y2 = selected_partitions_global[list(selected_partitions_global.keys())[0]]
