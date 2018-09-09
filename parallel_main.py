@@ -51,7 +51,7 @@ if __name__ == "__main__":
     while True:
         # current frame
         ret_value, frame = camera.read()
-        denoised_value = utils.denoise(image)
+        # denoised_value = utils.denoise(image)
         if ret_value == False:
             break
 
@@ -98,17 +98,20 @@ if __name__ == "__main__":
                     for partition_number in selected_partitions_global.keys():
                         print(partition_number)
 
-                        def wrapper(func, frame_no, partition_number, coords, frame, ret_list):
-                            map_ret = func(coords, frame)
+                        def wrapper(func, frame_no, partition_number, coords, img_frame, ret_list):
+                            img_frame = utils.denoise(img_frame)
+                            map_ret = func(coords, img_frame)
+
                             obj = {
                                 'fno': frame_no,
                                 'pno': partition_number,
                                 'coords': coords,
-                                'return': map_ret
+                                'return': map_ret,
+                                # 'd_frame': img_frame
                             }
                             print(map_ret)
 
-                            return_list.append(obj)
+                            ret_list.append(obj)
 
                         targt_func_args = (mapper_func[partition_number], num_frames, partition_number, 
                             selected_partitions_global[partition_number], frame, return_list)
@@ -120,13 +123,22 @@ if __name__ == "__main__":
                         # mapper_return = mapper_func[partition_number](selected_partitions_global[partition_number], frame)
                         # print("Partition: ", partition_number, "Output: ", mapper_return)
                         # x1, y1, x2, y2 = selected_partitions_global[partition_number]
-                        cv2.rectangle(denoised_clone, (x1, y1), (x2, y2), (0, 255, 0), 5)
+                        # cv2.rectangle(denoised_clone, (x1, y1), (x2, y2), (0, 255, 0), 5)
 
                 start(all_procs)
                 stop(all_procs)
 
                 print('Printing return list: ', return_list)
-		make_csv(sys.argv[1], num_frames, return_list)
+
+                for ret in return_list:
+                    x1, y1, x2, y2 = ret['coords']
+                    # d_frame = ret['d_frame']
+                    # print(d_frame.shape)
+                    # cv2.rectangle(d_frame, (x1, y1), (x2, y2), (0, 255, 0), 5)
+
+                # cv2.imshow('output', d_frame)
+
+                make_csv(sys.argv[1], num_frames, return_list)
                 end_time = time() # start time of partition functions
 
                 print('Time taken for the frame: ', (end_time - start_time))
@@ -137,10 +149,10 @@ if __name__ == "__main__":
 
 
 
-        num_frames = (num_frames+1)%200
+        num_frames = (num_frames+1)%700
 
         # display the frame with segmented hand
-        cv2.imshow("denoised Video", denoised_clone)
+        # cv2.imshow("denoised Video", denoised_clone)
 
 
         # cv2.rectangle(clone, (x1, y1), (x2, y2), (255, 0, 0))

@@ -2,13 +2,13 @@ import csv
 
 def search(e, l):
     for i in l:
-        if i == l['pno']:
-            return l['return']
+        if e == i['pno']:
+            return i['return']
 
     return '-'
 
 def make_csv(name, num, data):
-    with open(str(name) + '.csv', 'w', newline='') as csvfile:
+    with open('out.csv', 'a', newline='') as csvfile:
         spamwriter = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         if num == 0:
             spamwriter.writerow(["Num", "VTA", "Air Speed", "Barometer", "ICE", "Latitude", "Vertical Speed", "Compass", "Wind", "Slip"])
