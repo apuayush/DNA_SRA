@@ -9,8 +9,9 @@ def threshold(image):
     """
     image = np.asarray(image)
     image = np.dot(image[...,:3], [0.299, 0.587, 0.114])
-    thresh = threshold_minimum(image[:,:])
-    return image[:, :] > thresh
+    # image = image.reshape(image.shape)
+    thresh = threshold_minimum(image)
+    return image > thresh
 
 
 def denoise(image):
@@ -27,7 +28,7 @@ def segment_divider(thresholded_frame):
     :return:
     """
     segments = []
-    selected_partition = []
+    selected_partition = {}
     with open('admin_tools/imgs/img.json', 'r') as f:
         segments = json.load(f)
     for single_seg in segments.keys():
@@ -38,7 +39,8 @@ def segment_divider(thresholded_frame):
             bench = np.count_nonzero((170 < cropped_image))
             # print(bench/ thresholded_frame.size)
             if bench / cropped_image.size > 0.0001:
-                selected_partition.append({single_seg: [x1,y1,x2,y2]})
+                selected_partition[single_seg] = [x1,y1,x2,y2]
+                # selected_partition.append({single_seg: [x1,y1,x2,y2]})
         except: pass
 
 

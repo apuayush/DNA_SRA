@@ -2,6 +2,8 @@ from utils import threshold
 import numpy as np
 import cv2
 import imutils
+import utils
+import matplotlib.pyplot as plt
 
 
 def VTA_2(coord, frame):
@@ -12,7 +14,16 @@ def VTA_2(coord, frame):
 
 
 def AirSpeed_3(coord, frame):
-    return 1
+    x1, y1, x2, y2 = coord
+    frame = frame[y1:y2, x1:x2]
+    print("threshold shape", frame.shape)
+    # frame = frame[55:80, 220:280]
+
+    frame = utils.threshold(frame).astype('float')
+    # plt.imshow(frame, cmap=plt.cm.gray)
+
+    txt = pytesseract.image_to_string(frame)
+    return txt
 
 
 def Baro_4(coord, frame):
@@ -22,15 +33,18 @@ def Baro_4(coord, frame):
 def ICE_5(coord, frame):
     x1, y1, x2, y2 = coord
     roi = frame[y1: y2, x1: x2]
-
+    flag = 0
     p = np.count_nonzero(roi > 200)
-
-    return p/frame.shape >= 0.15
+    p = p / frame.size
+    if p >= 0.05:
+        flag = 1
+    return flag
 
 
 def LAT_6(coord, frame):
 
     lat = frame[coord[1]:coord[-1], coord[0]:coord[-2]]
+    # print(lat.shape)
     t = threshold(np.asarray(frame)[34:45, 50:222])
     n = np.where(t == True)
     y = sum(n[1])/len(n[1])
