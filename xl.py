@@ -7,8 +7,8 @@ def search(e, l):
 
     return '-'
 
-def make_csv(num, data):
-    with open('out.csv', 'w', newline='') as csvfile:
+def make_csv(name, num, data):
+    with open(str(name) + '.csv', 'w', newline='') as csvfile:
         spamwriter = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         if num == 0:
             spamwriter.writerow(["Num", "VTA", "Air Speed", "Barometer", "ICE", "Latitude", "Vertical Speed", "Compass", "Wind", "Slip"])
