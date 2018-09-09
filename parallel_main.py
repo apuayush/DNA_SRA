@@ -8,7 +8,7 @@ from sklearn.metrics import pairwise
 import utils
 
 bg = None
-
+pool = Pool(processes=8)
 
 def running_avg(img, avg_wt):
     global bg
