@@ -72,12 +72,11 @@ def Slip_9(coord, frame):
     cnts = cnts[0] if imutils.is_cv2() else cnts[1]
 
     m = 0
-    for c in cnts:
-        M = cv2.moments(c)
+    M = cv2.moments(cnts[0])
     cX = int(M["m10"] / M["m00"])
     m = max(abs(cX - 123), m)
 
-    return m / 123 * 100
+    return (((m / 123 * 100)-50)/10)+2
 
 def alt_digit(coords, frame):
     return 1
