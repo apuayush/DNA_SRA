@@ -10,7 +10,7 @@ def threshold(image):
     image = np.asarray(image)
     image = np.dot(image[...,:3], [0.299, 0.587, 0.114])
     thresh = threshold_minimum(image[:,:])
-    return image[:,:] > thresh
+    return image[:, :] > thresh
 
 
 def denoise(image):
