@@ -10,7 +10,7 @@ from sklearn.metrics import pairwise
 import utils
 from multiprocessing import Process, Manager, Lock
 from time import time
-
+from xl import make_csv
 
 img = None
 
@@ -126,7 +126,7 @@ if __name__ == "__main__":
                 stop(all_procs)
 
                 print('Printing return list: ', return_list)
-
+		make_csv(num_frames, return_list)
                 end_time = time() # start time of partition functions
 
                 print('Time taken for the frame: ', (end_time - start_time))
