@@ -28,12 +28,12 @@ mapper_func = {
 
 def start(process_list):
     for proc in process_list:
-        p.start()
+        proc.start()
 
 
 def stop(process_list):
     for proc in process_list:
-        p.join()
+        proc.join()
 
 
 if __name__ == "__main__":
@@ -45,6 +45,7 @@ if __name__ == "__main__":
     x1, x2, y1, y2 = [0]*4
     selected_partitions_global = []
     pool = Pool(processes=4)
+    manager = Manager()
 
     while True:
         # current frame
@@ -89,13 +90,30 @@ if __name__ == "__main__":
                 print(len(selected_partitions_global))
 
                 all_procs = [] # store processes to join
+                return_list = manager.list()
 
                 if len(selected_partitions_global) > 0:
                     for partition_number in selected_partitions_global.keys():
                         print(partition_number)
 
-                        all_procs.append(Process(target=mapper_func[partition_number], 
-                            args=(selected_partitions_global[partition_number], frame)))
+                        def wrapper(func, frame_no, partition_number, coords, frame, ret_list):
+                            map_ret = func(coords, frame)
+                            obj = {
+                                'fno': frame_no,
+                                'pno': partition_number,
+                                'coords': coords,
+                                'return': map_ret
+                            }
+                            print(map_ret)
+
+                            return_list.append(obj)
+
+                        targt_func_args = (mapper_func[partition_number], num_frames, partition_number, 
+                            selected_partitions_global[partition_number], frame, return_list)
+                        all_procs.append(Process(target=wrapper, args=targt_func_args))
+
+                        # all_procs.append(Process(target=mapper_func[partition_number], 
+                        #     args=(selected_partitions_global[partition_number], frame)))
 
                         # mapper_return = mapper_func[partition_number](selected_partitions_global[partition_number], frame)
                         # print("Partition: ", partition_number, "Output: ", mapper_return)
@@ -105,10 +123,11 @@ if __name__ == "__main__":
                 start(all_procs)
                 stop(all_procs)
 
-                cv2.imshow("Thesholded", thresholded)
+                print('Printing return list: ', return_list)
+
+                # cv2.imshow("Thesholded", thresholded)
                 # x1, y1, x2, y2 = selected_partitions_global[list(selected_partitions_global.keys())[0]]
                 # cv2.rectangle(denoised_clone, (x1,y1),(x2,y2), (0,255,0), 5)
-                cv2.imshow("Denoised Video", denoised_clone)
 
 
 
@@ -120,11 +139,11 @@ if __name__ == "__main__":
 
         # cv2.rectangle(clone, (x1, y1), (x2, y2), (255, 0, 0))
         # observe the keypress by the user
-        keypress = cv2.waitKey(1) & 0xFF
+        # keypress = cv2.waitKey(1) & 0xFF
 
         # if the user pressed "q", then stop looping
-        if keypress == ord("q"):
-            break
+        # if keypress == ord("q"):
+        #     break
 
     camera.release()
     cv2.destroyAllWindows()
