@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 import imutils
 import utils
+import pytesseract
 import matplotlib.pyplot as plt
 
 
@@ -16,13 +17,14 @@ def VTA_2(coord, frame):
 def AirSpeed_3(coord, frame):
     x1, y1, x2, y2 = coord
     frame = frame[y1:y2, x1:x2]
-    print("threshold shape", frame.shape)
-    # frame = frame[55:80, 220:280]
-
+    # print("threshold shape", frame.shape)
+    frame = frame[155:195, 5:50]
+    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
     frame = utils.threshold(frame).astype('float')
     # plt.imshow(frame, cmap=plt.cm.gray)
 
     txt = pytesseract.image_to_string(frame)
+    txt = txt.replace("D","0").replace("U", "0").replace("O","0").replace("S", "5")
     return txt
 
 

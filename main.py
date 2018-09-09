@@ -51,7 +51,7 @@ if __name__ == "__main__":
         thresh = cv2.dilate(thresh, None, iterations=4)
 
         # calibrating our running average until a threshold is reached
-        # denoised_clone = utils.denoise(clone)
+        denoised_clone = utils.denoise(clone)
 
 
         if num_frames < 6:
@@ -74,14 +74,14 @@ if __name__ == "__main__":
                 if len(selected_partitions_global) > 0:
                     for partition_number in selected_partitions_global.keys():
                         print(partition_number)
-                        mapper_return = mapper_func[partition_number](selected_partitions_global[partition_number], clone)
+                        mapper_return = mapper_func[partition_number](selected_partitions_global[partition_number], denoised_clone)
                         print("Partition: ", partition_number, "Output: ", mapper_return)
                         x1, y1, x2, y2 = selected_partitions_global[partition_number]
-                        # cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 5)
+                        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 5)
 
                 # cv2.imshow("Thesholded", thresholded)
 
-                cv2.imshow("Denoised Video", frame)
+                cv2.imshow("Denoised Video", denoised_clone)
 
 
 
