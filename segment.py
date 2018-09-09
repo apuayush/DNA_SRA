@@ -92,7 +92,7 @@ if __name__ == "__main__":
                 # cv2.rectangle(clone, (x1, y1), (x2, y2), (255, 0, 0))
                 cv2.imshow("Thesholded", thresholded)
 
-        num_frames = (num_frames+1)%300
+        num_frames = (num_frames+1)%200
 
         # display the frame with segmented hand
         cv2.imshow("Video Feed", clone)
