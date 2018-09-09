@@ -10,7 +10,7 @@ from sklearn.metrics import pairwise
 import utils
 from multiprocessing import Process, Manager, Lock
 from time import time
-from xl import make_csv
+
 
 img = None
 
@@ -39,8 +39,7 @@ def stop(process_list):
 
 if __name__ == "__main__":
     avg_wt = 0.6
-    camera = cv2.VideoCapture(sys.argv[1])
-    # camera = cv2.VideoCapture('data/Problem 2/slip.avi')
+    camera = cv2.VideoCapture('dataset/LAT_DEV.avi')
     # initialize num of frames
     num_frames = 0
     x1, x2, y1, y2 = [0]*4
@@ -51,7 +50,7 @@ if __name__ == "__main__":
     while True:
         # current frame
         ret_value, frame = camera.read()
-        denoised_value = utils.denoise(image)
+
         if ret_value == False:
             break
 
@@ -120,13 +119,13 @@ if __name__ == "__main__":
                         # mapper_return = mapper_func[partition_number](selected_partitions_global[partition_number], frame)
                         # print("Partition: ", partition_number, "Output: ", mapper_return)
                         # x1, y1, x2, y2 = selected_partitions_global[partition_number]
-                        cv2.rectangle(denoised_clone, (x1, y1), (x2, y2), (0, 255, 0), 5)
+                        # cv2.rectangle(denoised_clone, (x1, y1), (x2, y2), (0, 255, 0), 5)
 
                 start(all_procs)
                 stop(all_procs)
 
                 print('Printing return list: ', return_list)
-		make_csv(sys.argv[1], num_frames, return_list)
+
                 end_time = time() # start time of partition functions
 
                 print('Time taken for the frame: ', (end_time - start_time))
@@ -140,7 +139,7 @@ if __name__ == "__main__":
         num_frames = (num_frames+1)%200
 
         # display the frame with segmented hand
-        cv2.imshow("denoised Video", denoised_clone)
+        # cv2.imshow("Video Feed", clone)
 
 
         # cv2.rectangle(clone, (x1, y1), (x2, y2), (255, 0, 0))
