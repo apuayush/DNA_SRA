@@ -1,45 +1,40 @@
-# libraries
+import imutils
+from mapper import *
+import utils
+from segment import *
 import cv2
 import imutils
 import sys
 import numpy as np
-from multiprocessing import Pool
 from sklearn.metrics import pairwise
 import utils
-
-bg = None
-pool = Pool(processes=8)
-
-def running_avg(img, avg_wt):
-    global bg
-
-    # for the first time
-    if bg is None:
-        bg = img.copy().astype('float')
-        return
-
-    # accumulating weighted average and updating the background
-    cv2.accumulateWeighted(img, bg, avg_wt)
+from multiprocessing import Process, Manager, Lock
 
 
-def segment(img, threshold=25):
-    global bg
-    # absolute difference between background and current frame
-    diff = cv2.absdiff(bg.astype("uint8"), img)
+img = None
 
-    # to get the foreground
-    thresholded = cv2.threshold(diff, threshold, 255, cv2.THRESH_BINARY)[1]
+mapper_func = {
+    "2": VTA_2,
+    "3": AirSpeed_3,
+    "4": Baro_4,
+    "5": ICE_5,
+    "6": LAT_6,
+    "7": VSP_7,
+    "8": Compass_8,
+    "9": Wind_9,
+    "10": Slip_9
+}
 
-    # contours
-    (_, cnts, _) = cv2.findContours(thresholded.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    if len(cnts) == 0:
-        # for no contour
-        return
-    else:
-        # maximum contour area
-        segmented = max(cnts, key=cv2.contourArea)
-        return (thresholded, segmented)
+def start(process_list):
+    for proc in process_list:
+        p.start()
+
+
+def stop(process_list):
+    for proc in process_list:
+        p.join()
+
 
 if __name__ == "__main__":
     avg_wt = 0.6
@@ -49,6 +44,8 @@ if __name__ == "__main__":
     num_frames = 0
     x1, x2, y1, y2 = [0]*4
     selected_partitions_global = []
+    pool = Pool(processes=4)
+
     while True:
         # current frame
         ret_value, frame = camera.read()
@@ -68,6 +65,8 @@ if __name__ == "__main__":
         thresh = cv2.dilate(thresh, None, iterations=4)
 
         # calibrating our running average until a threshold is reached
+        # denoised_clone = utils.denoise(clone)
+
 
         if num_frames < 6:
             running_avg(thresh, avg_wt)
@@ -79,26 +78,45 @@ if __name__ == "__main__":
                 # i.e. if segmented
                 (thresholded, segmented) = seg_img
                 # print("Center", center)
-                if num_frames < 20:
+                if num_frames < 50:
                     selected_partitions = utils.segment_divider(thresholded)
                     if len(selected_partitions_global) < len(selected_partitions):
                         selected_partitions_global = selected_partitions
                 # return segment coordinates cooresponding to a center value
                 # map to all the functions
-                """
-                3 - use each mapper function to make meaning of each segment change and save it in excel too 
-                4 - 
-                """
-
                 # cv2.rectangle(clone, (x1, y1), (x2, y2), (255, 0, 0))
+                # get the mapper function to each segment
+                print(len(selected_partitions_global))
+
+                all_procs = [] # store processes to join
+
+                if len(selected_partitions_global) > 0:
+                    for partition_number in selected_partitions_global.keys():
+                        print(partition_number)
+
+                        all_procs.append(Process(target=mapper_func[partition_number], 
+                            args=(selected_partitions_global[partition_number], frame)))
+
+                        # mapper_return = mapper_func[partition_number](selected_partitions_global[partition_number], frame)
+                        # print("Partition: ", partition_number, "Output: ", mapper_return)
+                        # x1, y1, x2, y2 = selected_partitions_global[partition_number]
+                        # cv2.rectangle(denoised_clone, (x1, y1), (x2, y2), (0, 255, 0), 5)
+
+                start(all_procs)
+                stop(all_procs)
+
                 cv2.imshow("Thesholded", thresholded)
+                # x1, y1, x2, y2 = selected_partitions_global[list(selected_partitions_global.keys())[0]]
+                # cv2.rectangle(denoised_clone, (x1,y1),(x2,y2), (0,255,0), 5)
+                cv2.imshow("Denoised Video", denoised_clone)
+
+
 
         num_frames = (num_frames+1)%200
 
         # display the frame with segmented hand
-        cv2.imshow("Video Feed", clone)
-        denoised_clone = utils.denoise(clone)
-        cv2.imshow("Denoised Video", denoised_clone)
+        # cv2.imshow("Video Feed", clone)
+
 
         # cv2.rectangle(clone, (x1, y1), (x2, y2), (255, 0, 0))
         # observe the keypress by the user
